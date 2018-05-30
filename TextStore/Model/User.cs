@@ -8,6 +8,7 @@ namespace TextStore.Model
     {
         public int Id { get; set; }
         public string Email { get; set; }
-        public int Secret { get; set; }
+        public string Secret { get; set; }
+        public bool IsActive { get; set; }
     }
 }
