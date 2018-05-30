@@ -30,6 +30,7 @@ namespace TextStore.WebApi.Data
             {
                 db.GetCollection<User>(users).EnsureIndex(x => x.Email);
                 db.GetCollection<User>(users).EnsureIndex(x => x.Secret);
+                db.GetCollection<User>(users).EnsureIndex(x => x.Login);
                 db.GetCollection<Story>(stories).EnsureIndex(x => x.Category);
                 db.GetCollection<UserStories>(userStories).EnsureIndex(x => x.UserId);
             }
@@ -53,11 +54,15 @@ namespace TextStore.WebApi.Data
             }
         }
 
-        public User GetUser(string email)
+        public User GetUser(string loginOrEmail)
         {
             using (var db = GetRepository())
             {
-                return db.Query<User>().Where(u => u.Email == email).Single();
+                var user = db.Query<User>().Where(u => u.Login == loginOrEmail).SingleOrDefault();
+                if (user == null)
+                    user = db.Query<User>().Where(u => u.Email == loginOrEmail).SingleOrDefault();
+
+                return user;
             }
         }
 
