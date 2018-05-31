@@ -15,17 +15,8 @@ namespace TextStore.WebApi.Data
         private static string users = "users";
         private static string userStories = "user_stories";
 
-        private LiteDbRepository()
+        public void Init()
         {
-            BsonMapper.Global.Entity<User>()
-                .Id(x => x.Id);
-
-            BsonMapper.Global.Entity<Story>()
-                .Id(x => x.Id);
-
-            BsonMapper.Global.Entity<UserStories>()
-                .DbRef(x => x.Story, stories);
-
             using (var db = GetLiteDb())
             {
                 db.GetCollection<User>(users).EnsureIndex(x => x.Email);
@@ -34,13 +25,31 @@ namespace TextStore.WebApi.Data
                 db.GetCollection<Story>(stories).EnsureIndex(x => x.Category);
                 db.GetCollection<UserStories>(userStories).EnsureIndex(x => x.UserId);
             }
+
+            BsonMapper.Global.Entity<User>()
+                .Id(x => x.Id);
+
+            BsonMapper.Global.Entity<Story>()
+                .Id(x => x.Id);
+
+            BsonMapper.Global.Entity<UserStories>()
+                .DbRef(x => x.Story, stories);
         }
 
         public IEnumerable<Story> GetStories(int page, int count)
         {
             using (var db = GetRepository())
             {
-                return db.Query<Story>(stories).ToEnumerable();                   
+                return db.Query<Story>().ToArray();                   
+            }
+        }
+
+        public IEnumerable<Story> GetStories()
+        {
+            using (var db = GetLiteDb())
+            {
+                var r = db.GetCollection<Story>().FindAll();
+                return r.ToArray();
             }
         }
 
@@ -84,7 +93,7 @@ namespace TextStore.WebApi.Data
             return new LiteDatabase(Configuration.GetConfiguration().LiteDb);
         }
 
-        public void Save<T>(T data)
+        public void Save<T>(T data) where T : DbItem
         {
             using (var db = GetRepository())
             {
@@ -92,29 +101,22 @@ namespace TextStore.WebApi.Data
             }
         }
 
-        public void Delete<T>(T data)
+        public void Delete<T>(int id) where T : DbItem
         {
-            var u = data as User;
-            if (u != null)
+            if (typeof(T) == typeof(User)
+                || typeof(T) == typeof(Story))
             {
-                u.IsActive = false;
-                Save(u);
-            }
+                T data = GetById<T>(id);
+                data.IsVisible = false;
+                Save(data);
+            }          
+        }
 
-            var s = data as Story;
-            if (s != null)
+        public T GetById<T>(int id) where T: DbItem
+        {
+            using (var db = GetRepository())
             {
-                s.IsVisible = false;
-                Save(s);
-            }
-
-            var us = data as UserStories;
-            if (us != null)
-            {
-                using (var db = GetRepository())
-                {
-                    db.Delete<UserStories>(new BsonValue(us.Id)) ;
-                }
+                return db.Query<T>().Where(x => x.Id == id).SingleOrDefault();
             }
         }
     }

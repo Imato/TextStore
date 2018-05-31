@@ -25,6 +25,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IRepository, LiteDbRepository>();
+            services.AddSingleton<InitData>();
             services.AddMvc();
         }
 
@@ -35,8 +36,10 @@ namespace WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseMvc();
+
+            app.ApplicationServices.GetService<InitData>().Init();
         }
     }
 }

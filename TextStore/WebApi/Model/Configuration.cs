@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TextStore.Model;
+using TextStore.WebApi.Infrastructure;
 
 namespace TextStore.WebApi.Model
 {
@@ -12,6 +14,7 @@ namespace TextStore.WebApi.Model
         private Configuration()
         {
             LiteDb = "./Data/TextStore.db";
+            SystemUser = new User("TextStore", "App.TextStore@gmail.com");
         }
         public static Configuration GetConfiguration()
         {
@@ -19,5 +22,7 @@ namespace TextStore.WebApi.Model
         }
 
         public string LiteDb { get; }
+
+        public User SystemUser { get; }
     }
 }

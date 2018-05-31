@@ -4,12 +4,18 @@ using System.Text;
 
 namespace TextStore.Model
 {
-    public class User
+    public class User : DbItem
     {
-        public int Id { get; set; }
         public string Login { get; set; }
         public string Email { get; set; }
         public string Secret { get; set; }
-        public bool IsActive { get; set; }
+
+        public User() { }
+
+        public User(string login, string email)
+        {
+            Login = login;
+            Email = email;
+        }
     }
 }

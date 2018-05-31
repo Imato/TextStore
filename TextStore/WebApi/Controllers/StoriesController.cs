@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using TextStore.Model;
 using TextStore.WebApi.Data;
 
 namespace WebApi.Controllers
@@ -19,36 +16,36 @@ namespace WebApi.Controllers
             _repository = repository;
         }
 
-        // GET: api/Story
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<Story> Get()
         {
-            return new string[] { "value1", "value2" };
+            return _repository.GetStories();
         }
 
-        // GET: api/Story/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        [HttpGet("{id}")]
+        public Story Get(int id)
         {
-            return "value";
+            return _repository.GetById<Story>(id);
         }
         
-        // POST: api/Story
         [HttpPost]
-        public void Post([FromBody]string value)
+        public void Post([FromBody]Story value)
         {
+            _repository.Save(value);
         }
         
-        // PUT: api/Story/5
+
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public void Put(int id, [FromBody]Story value)
         {
+            if (_repository.GetById<Story>(id) != null)
+                _repository.Save(value);
         }
         
-        // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            _repository.Delete<Story>(id);
         }
     }
 }
